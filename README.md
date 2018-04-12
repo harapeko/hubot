@@ -212,3 +212,9 @@ Add the subdomain hubot should connect to. If you web URL looks like
 
 You may want to get comfortable with `heroku logs` and `heroku restart` if
 you're having issues.
+
+# MEMO
+- [Hubot のログ情報 (`Robot#logger`) まとめ](https://qiita.com/bouzuya/items/40b54e511d57954c9338)
+
+# 実行結果
+![2018-04-13 5 24 34](https://user-images.githubusercontent.com/1858578/38702225-03b43410-3edb-11e8-9460-b6d9c59d87e0.png)

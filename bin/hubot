@@ -8,4 +8,5 @@ export PATH="node_modules/.bin:node_modules/hubot/node_modules/.bin:$PATH"
 #git管理しないので環境変数に書き込んでおく
 #HUBOT_SLACK_TOKEN=xoxb-xxxxxxxxxxxxxxxxxxxxxxxxx
 
+PORT=9999 \
 exec node_modules/.bin/hubot --name "haraheri" "$@"

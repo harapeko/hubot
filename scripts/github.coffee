@@ -1,3 +1,5 @@
+# TODO: ちゃんとドキュメントを書く
+# 
 # Description:
 #   Example scripts for you to examine and try out.
 #
@@ -9,19 +11,70 @@
 #   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
 
 module.exports = (robot) ->
-  # robot.router.post '/github/webhook', (req, res) ->
-  #   robot.logger.debug 'hogeeeeeee'
-  #   console.info 'testttttttt'
-  #   console.info req.body
-  #   res.end()
 
-  robot.router.get '/web', (req, res) ->
-    res.send 'hogeee'
-    res.end "ok"
+  # リポジトリとSlackのチャンネル対照表
+  # NOTE:
+  # "githubのユーザーID": "SlackのユーザーID"
+  # Slackのユーザー右クリのCopyLinkでID取れる
+  MAP_SLACK_USER = {
+    "okeparah": "<@UA5V6PW8P>",
+    "harapeko": "<@U03Q813AE>",
+  }
 
+  # SlackのチャンネルID(harapeko_labo)
+  # NOTE:
+  # Slackのチャンネル右クリのCopyLinkでチャンネルID取れる
+  SLACK_CHANNEL = "G61KU5XJA"
+
+  # PRレビューがアサインされたらSlackのチャンネルに通知するgithub webhook
+  # /github/webhook が Payload URL
+  robot.router.post '/github/webhook', (req, res) ->
+    # event type、body、action 取得
+    # 処理を続けるかの判断に使用する
+    event_type = req.get 'X-Github-Event'
+    data = req.body
+    action = data.action
+
+    # [DEBUG]
+    robot.logger.info "event_type is #{event_type}"
+    robot.logger.info "action is #{action}"
+
+    # PR && Reviewers追加でなければ終了
+    unless (event_type == 'pull_request') && (action == 'review_requested')
+      res.end
+
+    # PRのURL、レビュワーに関するデータ、レビュワーのSlackユーザ名を取得する
+    pr_url = data.pull_request.html_url
+    reviewers_data = data.pull_request.requested_reviewers
+    slack_users = reviewers_data.map (reviewer) ->
+      MAP_SLACK_USER[reviewer.login] ? reviewer.login
+
+    # [DEBUG]
+    pr_robot.logger.info "pr_url is #{pr_url}"
+    robot.logger.info "slack_users is #{slack_users}"
+    console.dir reviewers_data
+
+    # hubotがslackのチャンネルにメンションする
+    robot.adapter.client.web.chat.postMessage SLACK_CHANNEL, pr_url +  "\r\n" + reviewers.join(',') + " レビュー依頼だよ！", {as_user: true, unfurl_links: false}
+
+    res.end
+
+
+  # get確認用(ngrokの200確認に使った)
+  robot.router.get '/' (req, res) ->
+    res.send 'get!'
+    res.end "bye"
+
+
+  # エラー表示
   robot.error (err, res) ->
-    robot.logger.error "DOES NOT COMPUTE"
+    robot.logger.error "ERROR: SOMETHING WRONG!!"
 
+
+
+  #
+  # NOTE: 参考で残しておく
+  #
   # robot.hear /badger/i, (res) ->
   #   res.send "Badgers? BADGERS? WE DON'T NEED NO STINKIN BADGERS"
   #
